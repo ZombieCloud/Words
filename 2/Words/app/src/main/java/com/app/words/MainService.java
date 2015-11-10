@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class MainService extends Service {
 
     final String LOG_TAG = "myLogs";
+    int n;   //Переменная-флаг, которая остановит поток. (По-людски поток вообще остановить нельзя?)
 
     public MainService() {
     }
@@ -33,6 +34,7 @@ public class MainService extends Service {
     }
 
     public void onDestroy() {
+        n = 1000001;   //Это остановит поток
         super.onDestroy();
         Log.d(LOG_TAG, "onDestroy");
     }
@@ -50,12 +52,13 @@ public class MainService extends Service {
     }
 
 
+
     // Достать/произнести слово. Запускаем в отдельном потоке
     void OneWord() {
         new Thread(new Runnable() {
             public void run() {
-                int n = 0;
-                while (true) {
+                n = 0;
+                while (n < 1000000) {
                     n++;
                     Log.d(LOG_TAG, "n = " + n);
                     try {
@@ -64,7 +67,7 @@ public class MainService extends Service {
                         e.printStackTrace();
                     }
                 }
-//                stopSelf();  // Останавливает сервис, в котором был вызван поток
+                stopSelf();  // Останавливает сервис, в котором был вызван поток
             }
         }).start();
     }
