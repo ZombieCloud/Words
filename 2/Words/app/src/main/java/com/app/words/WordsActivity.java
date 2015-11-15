@@ -75,9 +75,7 @@ public class WordsActivity extends AppCompatActivity {
         WordIntent.putExtra("lastNum", lastNum);
         WordIntent.putExtra("Interval", Interval);
 
-//        WordIntent.putExtra("startNum", "100000");    // "putExtra"  вкладывает параметры в "intent". Их потом подберем в сервисе
-//        WordIntent.putExtra("lastNum", "100000");
-//        WordIntent.putExtra("Interval", "4");
+
 
         if (ServiceRunning(MainService.class)) {
             stopService(WordIntent);

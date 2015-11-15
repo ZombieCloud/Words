@@ -111,23 +111,29 @@ public class MainService extends Service {
 
 
 
-    //Произнести слово
-    private void PlayWord(File fileToPlay) {
+    //Произнести слово. Запускаем в отдельном потоке, иначе замерзает при отключении экрана.
+    //Видимо, плеер работает в потоке приложения, поэтому замерзает
+    private void PlayWord(final File fileToPlay) {
+        new Thread(new Runnable() {
+            public void run() {
 
-        KillPlayer();
+                KillPlayer();
 
-        //Новый плеер
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            myUri = Uri.parse(fileToPlay.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
-            mediaPlayer.setDataSource(getApplicationContext(), myUri);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            KillPlayer();
-        }
+                //Новый плеер
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                try {
+                    myUri = Uri.parse(fileToPlay.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
+                    mediaPlayer.setDataSource(getApplicationContext(), myUri);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    KillPlayer();
+
+                }
+            }
+        }).start();
     }
 
 
