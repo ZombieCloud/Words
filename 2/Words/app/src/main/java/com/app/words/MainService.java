@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -18,7 +17,8 @@ public class MainService extends Service {
     final String LOG_TAG = "wordLogs";
     int n;     // Счетчик слов
     boolean stop_thread;   // Переменная-флаг, которая остановит поток. (По-людски поток вообще остановить нельзя?)
-    MediaPlayer mediaPlayer;
+    MediaPlayer mediaPlayer_en;
+    MediaPlayer mediaPlayer_ru;
     Uri myUri;
     Word newWord;
 
@@ -41,10 +41,9 @@ public class MainService extends Service {
         Log.d(LOG_TAG, "onStartCommand");
         Log.d(LOG_TAG, "startNum = " + intent.getStringExtra("startNum"));
         Log.d(LOG_TAG, "lastNum = " + intent.getStringExtra("lastNum"));
-        Log.d(LOG_TAG, "Interval = " + intent.getStringExtra("Interval"));
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
-        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")),     Integer.valueOf(intent.getStringExtra("lastNum")),     Integer.valueOf(intent.getStringExtra("Interval")));
+        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")), Integer.valueOf(intent.getStringExtra("lastNum")));
 
         Notification noti = new Notification();
         startForeground(666, noti);
@@ -75,7 +74,7 @@ public class MainService extends Service {
 
 
     // Достать/произнести слово. Запускаем в отдельном потоке
-    void Start_Fetching_Of_The_Words(final int startNum,   final int lastNum,   final int interval) {
+    void Start_Fetching_Of_The_Words(final int startNum,   final int lastNum) {
         new Thread(new Runnable() {
             public void run() {
 
@@ -87,16 +86,10 @@ public class MainService extends Service {
                     newWord = new Word(String.valueOf(n));
 
 //                    _textView.setText(newWord._ru);
-                    PlayWord(newWord._ruSound);
-                    Pause(interval);
-
+                    PlayWords(newWord);
 //                    _textView.setText(newWord._en);
-                    PlayWord(newWord._enSound);
-                    Pause(interval);
 
                     newWord = null;
-
-                    KillPlayer();
 
                     //Следующее слово
                     n++;
@@ -115,23 +108,58 @@ public class MainService extends Service {
 
 
     //Произнести слово
-    private void PlayWord(final File fileToPlay) {
+    private void PlayWords(Word _word) {
+
+        int pause_en = 1;
+        int pause_ru = 1;
 
         KillPlayer();
 
-        //Новый плеер
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        //Новый плеер en
+        mediaPlayer_en = new MediaPlayer();
+        mediaPlayer_en.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            myUri = Uri.parse(fileToPlay.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
-            mediaPlayer.setDataSource(getApplicationContext(), myUri);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
+            myUri = Uri.parse(_word._enSound.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
+            mediaPlayer_en.setDataSource(getApplicationContext(), myUri);
+            mediaPlayer_en.prepare();
+            pause_en = (mediaPlayer_en.getDuration() / 1000 + 1) * 2;
+
+            Log.d(LOG_TAG, "pause_en  =  " + pause_en);
+
         } catch (IOException e) {
             e.printStackTrace();
             KillPlayer();
         }
+
+
+        //Новый плеер ru
+        mediaPlayer_ru = new MediaPlayer();
+        mediaPlayer_ru.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            myUri = Uri.parse(_word._ruSound.getAbsolutePath());
+            mediaPlayer_ru.setDataSource(getApplicationContext(), myUri);
+            mediaPlayer_ru.prepare();
+            pause_ru = mediaPlayer_ru.getDuration() / 1000 + 1;
+
+            Log.d(LOG_TAG, "pause_ru  =  " + pause_ru);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            KillPlayer();
+        }
+
+
+        //Начинаем играть
+        mediaPlayer_ru.start();
+        Pause(pause_ru + pause_en);
+        mediaPlayer_en.start();
+        Pause(pause_en + 3);
+
+
+        KillPlayer();
+
     }
+
 
 
 
@@ -146,12 +174,24 @@ public class MainService extends Service {
 
 
 
-    //Попытаемся убить плеер. Вдруг играет
+    //Попытаемся убить плеера. Вдруг играет или еще чего случилось
     private void KillPlayer() {
-        if (mediaPlayer != null) {
+        //Убить англ.плеер
+        if (mediaPlayer_en != null) {
             try {
-                mediaPlayer.release();
-                mediaPlayer = null;
+                mediaPlayer_en.release();
+                mediaPlayer_en = null;
+            } catch (Exception e) {
+                Log.d(LOG_TAG, "Can't kill player");
+                e.printStackTrace();
+            }
+        }
+
+        //Убить рус.плеер
+        if (mediaPlayer_ru != null) {
+            try {
+                mediaPlayer_ru.release();
+                mediaPlayer_ru = null;
             } catch (Exception e) {
                 Log.d(LOG_TAG, "Can't kill player");
                 e.printStackTrace();

@@ -21,11 +21,9 @@ public class WordsActivity extends AppCompatActivity {
     TextView _textView;
     EditText _firstWord;
     EditText _lastWord;
-    EditText _timeInterval;
 
     String startNum;
     String lastNum;
-    String Interval;
 
     Button button;
 
@@ -46,7 +44,6 @@ public class WordsActivity extends AppCompatActivity {
         _textView = (TextView) findViewById(R.id.textView);
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
-        _timeInterval = (EditText) findViewById(R.id.timeInterval);
     }
 
 
@@ -58,14 +55,12 @@ public class WordsActivity extends AppCompatActivity {
         try {
             startNum = (Integer.valueOf(_firstWord.getText().toString())).toString();
             lastNum = (Integer.valueOf(_lastWord.getText().toString())).toString();
-            Interval = (Integer.valueOf(_timeInterval.getText().toString())).toString();
 
         } catch (Exception e) {
 
             Log.d(LOG_TAG, "WRONG NUMBERS !!!");
             startNum = "100000";
             lastNum = "100000";
-            Interval = "4";
         }
 
 
@@ -73,7 +68,6 @@ public class WordsActivity extends AppCompatActivity {
         Intent WordIntent = new Intent(this, MainService.class);
         WordIntent.putExtra("startNum", startNum);    // "putExtra"  вкладывает параметры в "intent". Их потом подберем в сервисе
         WordIntent.putExtra("lastNum", lastNum);
-        WordIntent.putExtra("Interval", Interval);
 
 
 

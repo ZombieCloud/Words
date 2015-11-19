@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="11"
+            android:text="13"
             android:id="@+id/textView"
             android:layout_gravity="center_horizontal"
             android:layout_weight="0.94"
@@ -47,16 +47,6 @@
                 android:inputType="number"
                 android:ems="10"
                 android:id="@+id/lastWord"
-                android:layout_weight="1"
-                android:numeric="integer"
-                android:singleLine="true" />
-
-            <EditText
-                android:layout_width="96dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:ems="10"
-                android:id="@+id/timeInterval"
                 android:layout_weight="1"
                 android:numeric="integer"
                 android:singleLine="true" />
