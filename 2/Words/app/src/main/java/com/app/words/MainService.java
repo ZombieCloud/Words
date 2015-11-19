@@ -46,8 +46,6 @@ public class MainService extends Service {
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
         Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")),     Integer.valueOf(intent.getStringExtra("lastNum")),     Integer.valueOf(intent.getStringExtra("Interval")));
 
-//        return super.onStartCommand(intent, flags, startId);
-
         Notification noti = new Notification();
         startForeground(666, noti);
         return START_STICKY;
@@ -116,30 +114,23 @@ public class MainService extends Service {
 
 
 
-
-    //Произнести слово. Запускаем в отдельном потоке, иначе замерзает при отключении экрана.
-    //Видимо, плеер работает в потоке приложения, поэтому замерзает
+    //Произнести слово
     private void PlayWord(final File fileToPlay) {
-        new Thread(new Runnable() {
-            public void run() {
 
-                KillPlayer();
+        KillPlayer();
 
-                //Новый плеер
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                try {
-                    myUri = Uri.parse(fileToPlay.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
-                    mediaPlayer.setDataSource(getApplicationContext(), myUri);
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    KillPlayer();
-
-                }
-            }
-        }).start();
+        //Новый плеер
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            myUri = Uri.parse(fileToPlay.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
+            mediaPlayer.setDataSource(getApplicationContext(), myUri);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            KillPlayer();
+        }
     }
 
 
