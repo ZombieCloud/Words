@@ -49,8 +49,10 @@ public class Word {
                 data = isw.read();
                 _en = _en + currentSymbol;
             }
+            isw = null;
 
         } catch (Exception e) {     //  Нет интернета
+            isw = null;
             _en = "Something wrong with internet :(  en_";
             Log.d(LOG_TAG, "Something wrong with internet :(  en_");
             e.printStackTrace();
@@ -74,8 +76,10 @@ public class Word {
                 data = isw.read();
                 _ru = _ru + currentSymbol;
             }
+            isw = null;
 
         } catch (Exception e) {     // Нет интернета
+            isw = null;
             _ru = "Something wrong with internet :(  ru_";
             Log.d(LOG_TAG, "Something wrong with internet :(  ru_");
             e.printStackTrace();
@@ -182,6 +186,7 @@ public class Word {
             }
             out.close();
             in.close();
+            buf = null;
         } catch (Exception e) {
             e.printStackTrace();
         }

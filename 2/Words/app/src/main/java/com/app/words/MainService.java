@@ -1,5 +1,6 @@
 package com.app.words;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -45,7 +46,11 @@ public class MainService extends Service {
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
         Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")),     Integer.valueOf(intent.getStringExtra("lastNum")),     Integer.valueOf(intent.getStringExtra("Interval")));
 
-        return super.onStartCommand(intent, flags, startId);
+//        return super.onStartCommand(intent, flags, startId);
+
+        Notification noti = new Notification();
+        startForeground(666, noti);
+        return START_STICKY;
     }
 
 
@@ -108,6 +113,7 @@ public class MainService extends Service {
             }
         }).start();
     }
+
 
 
 
