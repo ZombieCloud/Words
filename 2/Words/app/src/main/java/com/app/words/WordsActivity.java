@@ -1,9 +1,12 @@
 package com.app.words;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +19,7 @@ import android.widget.TextView;
 
 public class WordsActivity extends AppCompatActivity {
 
+    public final static String WORD_NUM = "word_num";
     final String LOG_TAG = "wordLogs";
 
     TextView _textView;
@@ -26,6 +30,8 @@ public class WordsActivity extends AppCompatActivity {
     String lastNum;
 
     Button button;
+
+    private MainService m_service;
 
 
     @Override
@@ -44,6 +50,12 @@ public class WordsActivity extends AppCompatActivity {
         _textView = (TextView) findViewById(R.id.textView);
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
+
+
+        TextView tv = (TextView) findViewById(R.id.textView);
+        Intent intent = getIntent();
+        String fileName = intent.getStringExtra(WORD_NUM);
+        tv.setText(WORD_NUM);
     }
 
 
@@ -72,13 +84,27 @@ public class WordsActivity extends AppCompatActivity {
 
 
         if (ServiceRunning(MainService.class)) {
+            unbindService(m_serviceConnection);
             stopService(WordIntent);
             button.setText("Go !!!");
         } else {
             startService(WordIntent);
+            bindService(WordIntent, m_serviceConnection, BIND_AUTO_CREATE);
             button.setText("Stop");
         }
     }
+
+
+    //Присоединиться к сервису
+    private ServiceConnection m_serviceConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            m_service = ((MainService.MyBinder)service).getService();
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            m_service = null;
+        }
+    };
 
 
 

@@ -1,11 +1,14 @@
 package com.app.words;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -21,6 +24,7 @@ public class MainService extends Service {
     MediaPlayer mediaPlayer_ru;
     Uri myUri;
     Word newWord;
+    NotificationManager nm;
 
 
     public MainService() {
@@ -29,6 +33,8 @@ public class MainService extends Service {
 
     public void onCreate() {
         super.onCreate();
+        nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        Start_Fetching_Of_The_Words(4, 10);
         Log.d(LOG_TAG, "onCreate");
         stop_thread = false;
     }
@@ -39,6 +45,7 @@ public class MainService extends Service {
     // У "onStartCommand" на вход и на выход идут параметры
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, "onStartCommand");
+        Log.d(LOG_TAG, "startId of service = " + startId);
         Log.d(LOG_TAG, "startNum = " + intent.getStringExtra("startNum"));
         Log.d(LOG_TAG, "lastNum = " + intent.getStringExtra("lastNum"));
 
@@ -46,7 +53,30 @@ public class MainService extends Service {
         Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")), Integer.valueOf(intent.getStringExtra("lastNum")));
 
         Notification noti = new Notification();
-        startForeground(666, noti);
+
+
+/*        Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text), System.currentTimeMillis());
+        Intent notificationIntent = new Intent(this, WordsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        notification.setLatestEventInfo(this, getText(R.string.notification_title),
+                getText(R.string.notification_message), pendingIntent);
+        startForeground(ONGOING_NOTIFICATION_ID, notification);
+        startForeground(startId, notification);   */
+
+//        sendNotif();
+
+
+/*        Notification noti = new Notification(R.drawable.notification_template_icon_bg, "Text in status bar", System.currentTimeMillis());
+        Intent wa_intent = new Intent(this, WordsActivity.class);
+        wa_intent.putExtra(WordsActivity.WORD_NUM, "word_num");
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        noti.setLatestEventInfo(this, "Notification's title", "Notification's text", pIntent);
+        noti.flags |= Notification.FLAG_AUTO_CANCEL;    */
+
+
+//        return super.onStartCommand(intent, flags, startId);
+
+//        startForeground(startId, noti);
         return START_STICKY;
     }
 
@@ -55,6 +85,7 @@ public class MainService extends Service {
 
     public void onDestroy() {
         stop_thread = true;   //Это остановит поток
+        newWord = null;
         super.onDestroy();
         Log.d(LOG_TAG, "onDestroy");
     }
@@ -73,10 +104,10 @@ public class MainService extends Service {
 
 
 
-    // Достать/произнести слово. Запускаем в отдельном потоке
+    // Достать/произнести слово.
     void Start_Fetching_Of_The_Words(final int startNum,   final int lastNum) {
-        new Thread(new Runnable() {
-            public void run() {
+//        new Thread(new Runnable() {
+//            public void run() {
 
                 n = startNum;
                 while ((n >= startNum) && (n <= lastNum)) {
@@ -88,6 +119,8 @@ public class MainService extends Service {
 //                    _textView.setText(newWord._ru);
                     PlayWords(newWord);
 //                    _textView.setText(newWord._en);
+
+                    sendNotif(String.valueOf(n));
 
                     newWord = null;
 
@@ -101,8 +134,8 @@ public class MainService extends Service {
                     if (stop_thread) break;
                 }
                 stopSelf();  // Останавливает сервис, в котором был вызван поток
-            }
-        }).start();
+//            }
+//        }).start();
     }
 
 
@@ -174,6 +207,7 @@ public class MainService extends Service {
 
 
 
+
     //Попытаемся убить плеера. Вдруг играет или еще чего случилось
     private void KillPlayer() {
         //Убить англ.плеер
@@ -200,5 +234,57 @@ public class MainService extends Service {
     }
 
 
+
+
+
+    public class MyBinder extends Binder {
+        public MainService getService() {
+            return MainService.this;
+        }
+    }
+
+
+
+
+
+    void sendNotif(String n) {
+        // 1-я часть
+        Notification notif = new Notification(R.drawable.notification_template_icon_bg, "now " + n, System.currentTimeMillis());
+
+        // 3-я часть
+        Intent intent = new Intent(this, WordsActivity.class);
+        intent.putExtra(WordsActivity.WORD_NUM, "n");
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        // 2-я часть
+        notif.setLatestEventInfo(this, "words", "now " + n, pIntent);
+
+        // ставим флаг, чтобы уведомление пропало после нажатия
+        notif.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        // отправляем
+        nm.notify(1, notif);
+
+        startForeground(1, notif);
+    }
+
+
+/*
+    private void addNotification() {
+        // create the notification
+        Notification.Builder m_notificationBuilder = new Notification.Builder(this)
+                .setContentTitle(getText(R.string.service_name))
+                .setContentText(getResources().getText(R.string.service_status_monitor))
+                .setSmallIcon(R.drawable.notification_small_icon);
+
+        // create the pending intent and add to the notification
+        Intent intent = new Intent(this, MainService.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        m_notificationBuilder.setContentIntent(pendingIntent);
+
+        // send the notification
+        m_notificationManager.notify(NOTIFICATION_ID, m_notificationBuilder.build());
+    }
+*/
 
 }
