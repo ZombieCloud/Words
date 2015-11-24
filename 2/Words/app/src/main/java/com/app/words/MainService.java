@@ -49,10 +49,16 @@ public class MainService extends Service {
         Log.d(LOG_TAG, "startNum = " + intent.getStringExtra("startNum"));
         Log.d(LOG_TAG, "lastNum = " + intent.getStringExtra("lastNum"));
 
+
+
+        startForeground(1, new Notification());
+
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
         Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")), Integer.valueOf(intent.getStringExtra("lastNum")));
 
-        Notification noti = new Notification();
+
+
+//        Notification noti = new Notification();
 
 
 /*        Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text), System.currentTimeMillis());
@@ -106,8 +112,8 @@ public class MainService extends Service {
 
     // Достать/произнести слово.
     void Start_Fetching_Of_The_Words(final int startNum,   final int lastNum) {
-//        new Thread(new Runnable() {
-//            public void run() {
+        new Thread(new Runnable() {
+            public void run() {
 
                 n = startNum;
                 while ((n >= startNum) && (n <= lastNum)) {
@@ -120,7 +126,9 @@ public class MainService extends Service {
                     PlayWords(newWord);
 //                    _textView.setText(newWord._en);
 
-                    sendNotif(String.valueOf(n));
+//                    Notif(String.valueOf(n));
+
+                    Notif(String.valueOf(n));
 
                     newWord = null;
 
@@ -133,9 +141,9 @@ public class MainService extends Service {
                     //Стоп потоку
                     if (stop_thread) break;
                 }
-                stopSelf();  // Останавливает сервис, в котором был вызван поток
-//            }
-//        }).start();
+                stopForeground(true);  // Останавливает сервис, в котором был вызван поток
+            }
+        }).start();
     }
 
 
@@ -247,25 +255,19 @@ public class MainService extends Service {
 
 
 
-    void sendNotif(String n) {
-        // 1-я часть
-        Notification notif = new Notification(R.drawable.notification_template_icon_bg, "now " + n, System.currentTimeMillis());
+    void Notif(String n) {
+        Notification noti = new Notification(R.drawable.notification_template_icon_bg, "now " + n, System.currentTimeMillis());
 
-        // 3-я часть
         Intent intent = new Intent(this, WordsActivity.class);
         intent.putExtra(WordsActivity.WORD_NUM, "n");
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        // 2-я часть
-        notif.setLatestEventInfo(this, "words", "now " + n, pIntent);
+        noti.setLatestEventInfo(this, "words", "now " + n, pIntent);
 
         // ставим флаг, чтобы уведомление пропало после нажатия
-        notif.flags |= Notification.FLAG_AUTO_CANCEL;
+        noti.flags |= Notification.FLAG_AUTO_CANCEL;
 
-        // отправляем
-        nm.notify(1, notif);
-
-        startForeground(1, notif);
+        nm.notify(1, noti);
     }
 
 
