@@ -88,6 +88,7 @@ public class WordsActivity extends AppCompatActivity {
             stopService(WordIntent);
             button.setText("Go !!!");
         } else {
+            WordIntent.setAction("STOPFOREGROUND_ACTION");
             startService(WordIntent);
             bindService(WordIntent, m_serviceConnection, BIND_AUTO_CREATE);
             button.setText("Stop");
