@@ -4,12 +4,14 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class MainService extends Service {
     Uri myUri;
     Word newWord;
     NotificationManager nm;
+    PowerManager.WakeLock wakeLock;
 
 
     public MainService() {
@@ -33,8 +36,18 @@ public class MainService extends Service {
 
     public void onCreate() {
         super.onCreate();
+
+        //Включить WakeLock
+        PowerManager devicePowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = devicePowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+        if(wakeLock != null){
+            if(wakeLock.isHeld() == false){
+                wakeLock.acquire();
+            }
+        }
+
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//        Start_Fetching_Of_The_Words(4, 10);
+
         Log.d(LOG_TAG, "onCreate");
         stop_thread = false;
     }
@@ -51,7 +64,7 @@ public class MainService extends Service {
 
 
         Notification noti = new Notification();
-        startForeground(1, noti);
+        startForeground(startId, noti);
 
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
@@ -87,6 +100,15 @@ public class MainService extends Service {
 
 
     public void onDestroy() {
+
+        //Отключить WakeLock
+        if (wakeLock != null) {
+            if(wakeLock.isHeld()){
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
         stopForeground(true);
 
         stop_thread = true;   //Это остановит поток
