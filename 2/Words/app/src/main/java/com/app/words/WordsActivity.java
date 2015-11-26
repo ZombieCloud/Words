@@ -14,24 +14,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-
+import java.io.IOException;
 
 
 public class WordsActivity extends AppCompatActivity {
 
     public final static String WORD_NUM = "word_num";
     final String LOG_TAG = "wordLogs";
-
     TextView _textView;
     EditText _firstWord;
     EditText _lastWord;
-
     String startNum;
     String lastNum;
-
     Button button;
-
     private MainService m_service;
+    boolean bound = false;
 
 
     @Override
@@ -52,10 +49,10 @@ public class WordsActivity extends AppCompatActivity {
         _lastWord = (EditText) findViewById(R.id.lastWord);
 
 
-        TextView tv = (TextView) findViewById(R.id.textView);
-        Intent intent = getIntent();
-        String fileName = intent.getStringExtra(WORD_NUM);
-        tv.setText(WORD_NUM);
+//        TextView tv = (TextView) findViewById(R.id.textView);
+//        Intent intent = getIntent();
+//        String fileName = intent.getStringExtra(WORD_NUM);
+//        tv.setText(WORD_NUM);
     }
 
 
@@ -83,14 +80,19 @@ public class WordsActivity extends AppCompatActivity {
 
 
 
+
+        //Запустить \ остановить сервис
         if (ServiceRunning(MainService.class)) {
-            unbindService(m_serviceConnection);
+            if (bound) {
+                unbindService(m_serviceConnection);
+                bound = false;
+            }
             stopService(WordIntent);
             button.setText("Go !!!");
         } else {
-            WordIntent.setAction("STOPFOREGROUND_ACTION");
             startService(WordIntent);
             bindService(WordIntent, m_serviceConnection, BIND_AUTO_CREATE);
+            bound = true;
             button.setText("Stop");
         }
     }
@@ -122,4 +124,3 @@ public class WordsActivity extends AppCompatActivity {
 
 
 }
-
