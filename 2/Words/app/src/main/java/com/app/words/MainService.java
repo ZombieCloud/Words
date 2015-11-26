@@ -54,7 +54,7 @@ public class MainService extends Service {
 
         Notif("fuck");
 
-        myThred = new MyThred();
+        myThred = new MyThread();
         myThred.start();
 
 
@@ -99,6 +99,7 @@ public class MainService extends Service {
     public void onDestroy() {
         stop_thread = true;   //Это остановит поток
         newWord = null;
+        myThred.stop();
         super.onDestroy();
         Log.d(LOG_TAG, "onDestroy");
     }
@@ -173,7 +174,7 @@ public class MainService extends Service {
 
 
 
-class MyThred extends Thread {
+class MyThread extends Thread {
 
     final String LOG_TAG = "wordLogs";
     int n;     // Счетчик слов
@@ -253,7 +254,6 @@ class MyThred extends Thread {
             mediaPlayer_ru.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
                 myUri = Uri.parse(_word._ruSound.getAbsolutePath());
-//                mediaPlayer_ru.setDataSource(getApplicationContext(), myUri);
                 mediaPlayer_ru.setDataSource(myUri.getPath());
                 mediaPlayer_ru.prepare();
                 pause_ru = mediaPlayer_ru.getDuration() / 1000 + 1;
