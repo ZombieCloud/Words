@@ -13,9 +13,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
 
 public class MainService extends Service {
 
@@ -46,6 +46,7 @@ public class MainService extends Service {
             }
         }
 
+        //Уведомлялка
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         Log.d(LOG_TAG, "onCreate");
@@ -63,6 +64,7 @@ public class MainService extends Service {
         Log.d(LOG_TAG, "lastNum = " + intent.getStringExtra("lastNum"));
 
 
+        // Запускаем сервис в режиме Foreground
         Notification noti = new Notification();
         startForeground(startId, noti);
 
@@ -70,29 +72,6 @@ public class MainService extends Service {
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
         Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")), Integer.valueOf(intent.getStringExtra("lastNum")),  startId);
 
-
-/*        Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text), System.currentTimeMillis());
-        Intent notificationIntent = new Intent(this, WordsActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        notification.setLatestEventInfo(this, getText(R.string.notification_title),
-                getText(R.string.notification_message), pendingIntent);
-        startForeground(ONGOING_NOTIFICATION_ID, notification);
-        startForeground(startId, notification);   */
-
-//        sendNotif();
-
-
-/*        Notification noti = new Notification(R.drawable.notification_template_icon_bg, "Text in status bar", System.currentTimeMillis());
-        Intent wa_intent = new Intent(this, WordsActivity.class);
-        wa_intent.putExtra(WordsActivity.WORD_NUM, "word_num");
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        noti.setLatestEventInfo(this, "Notification's title", "Notification's text", pIntent);
-        noti.flags |= Notification.FLAG_AUTO_CANCEL;    */
-
-
-//        return super.onStartCommand(intent, flags, startId);
-
-//        startForeground(startId, noti);
         return START_STICKY;
     }
 
@@ -136,31 +115,32 @@ public class MainService extends Service {
         new Thread(new Runnable() {
             public void run() {
 
-        n = startNum;
-        while ((n >= startNum) && (n <= lastNum)) {
-            Log.d(LOG_TAG, "n = " + n);
+                n = startNum;
+                while ((n >= startNum) && (n <= lastNum)) {
 
-            //Достать новое слово
-            newWord = new Word(String.valueOf(n));
+                    //Стоп потоку
+                    if (stop_thread) break;
 
-//                    _textView.setText(newWord._ru);
-            PlayWords(newWord);
-//                    _textView.setText(newWord._en);
+                    Log.d(LOG_TAG, "n = " + n);
 
-            sendNotif(String.valueOf(n), startId);
+                    // Отослать уведомление
+                    sendNotif(String.valueOf(n), startId);
 
-            newWord = null;
+                    //Достать новое слово
+                    newWord = new Word(String.valueOf(n));
 
-            //Следующее слово
-            n++;
+                    // Проиграть слово
+                    PlayWords(newWord);
 
-            // Заново
-            if (n > lastNum) n = startNum;
+                    newWord = null;
 
-            //Стоп потоку
-            if (stop_thread) break;
-        }
-        stopSelf();  // Останавливает сервис, в котором был вызван поток
+                    //Следующее слово
+                    n++;
+
+                    // Заново
+                    if (n > lastNum) n = startNum;
+                }
+                stopSelf();  // Останавливает сервис, в котором был вызван поток
             }
         }).start();
     }
@@ -182,7 +162,7 @@ public class MainService extends Service {
             myUri = Uri.parse(_word._enSound.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
             mediaPlayer_en.setDataSource(getApplicationContext(), myUri);
             mediaPlayer_en.prepare();
-            pause_en = (mediaPlayer_en.getDuration() / 1000 + 1) * 2;
+            pause_en = (int) ((mediaPlayer_en.getDuration() / 1000 + 1) * 2.5);
 
             Log.d(LOG_TAG, "pause_en  =  " + pause_en);
 
@@ -217,7 +197,6 @@ public class MainService extends Service {
 
 
         KillPlayer();
-
     }
 
 
@@ -273,12 +252,12 @@ public class MainService extends Service {
 
 
 
-
+    // Уведомление
     void sendNotif(String n, int startId) {
         Notification notif = new Notification(R.drawable.notification_template_icon_bg, "now " + n, System.currentTimeMillis());
 
         Intent intent = new Intent(this, WordsActivity.class);
-        intent.putExtra(WordsActivity.WORD_NUM, "n");
+        intent.putExtra(WordsActivity.WORD_NUM, n);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         notif.setLatestEventInfo(this, "words", "now " + n, pIntent);

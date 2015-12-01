@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.IOException;
 
 
 public class WordsActivity extends AppCompatActivity {
@@ -39,6 +38,11 @@ public class WordsActivity extends AppCompatActivity {
         //Устанавливаем заголовок кнопки в зависимости от того, запущен ли сервис
         button = (Button) findViewById(R.id.button);
         if (ServiceRunning(MainService.class)) {
+
+            //Присоединиться к сервису
+            Intent WordIntent = new Intent(this, MainService.class);
+            bindService(WordIntent, m_serviceConnection, BIND_AUTO_CREATE);
+
             button.setText("Stop");
         } else {
             button.setText("Go !!!");
@@ -48,11 +52,6 @@ public class WordsActivity extends AppCompatActivity {
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
 
-
-//        TextView tv = (TextView) findViewById(R.id.textView);
-//        Intent intent = getIntent();
-//        String fileName = intent.getStringExtra(WORD_NUM);
-//        tv.setText(WORD_NUM);
     }
 
 
@@ -81,7 +80,7 @@ public class WordsActivity extends AppCompatActivity {
 
 
 
-        //Запустить \ остановить сервис
+        //Запустить-присоединиться \ отсоединиться-остановить сервис
         if (ServiceRunning(MainService.class)) {
             if (bound) {
                 unbindService(m_serviceConnection);
@@ -98,7 +97,7 @@ public class WordsActivity extends AppCompatActivity {
     }
 
 
-    //Присоединиться к сервису
+    // Писоединение к сервису
     private ServiceConnection m_serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             m_service = ((MainService.MyBinder)service).getService();
