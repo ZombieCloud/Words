@@ -41,7 +41,7 @@ public class MainService extends Service {
         PowerManager devicePowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = devicePowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
         if(wakeLock != null){
-            if(wakeLock.isHeld() == false){
+            if(!wakeLock.isHeld()){
                 wakeLock.acquire();
             }
         }
@@ -60,8 +60,8 @@ public class MainService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, "onStartCommand");
         Log.d(LOG_TAG, "startId of service = " + startId);
-        Log.d(LOG_TAG, "startNum = " + intent.getStringExtra("startNum"));
-        Log.d(LOG_TAG, "lastNum = " + intent.getStringExtra("lastNum"));
+        Log.d(LOG_TAG, "startNum = " + intent.getStringExtra(WordsActivity.PARAM_START_NUM));
+        Log.d(LOG_TAG, "lastNum = " + intent.getStringExtra(WordsActivity.PARAM_LAST_NUM));
 
 
         // Запускаем сервис в режиме Foreground
@@ -70,7 +70,7 @@ public class MainService extends Service {
 
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
-        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra("startNum")), Integer.valueOf(intent.getStringExtra("lastNum")),  startId);
+        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  startId);
 
         return START_STICKY;
     }
@@ -242,31 +242,22 @@ public class MainService extends Service {
 
 
 
-
-    public class MyBinder extends Binder {
-        public MainService getService() {
-            return MainService.this;
-        }
-    }
-
-
-
-
-    // Уведомление
+    // Уведомление и инфомация для Activity
     void sendNotif(String n, int startId) {
+
+        // Отослать уведомление в WordActiity
         Notification notif = new Notification(R.drawable.notification_template_icon_bg, "now " + n, System.currentTimeMillis());
-
         Intent intent = new Intent(this, WordsActivity.class);
-        intent.putExtra(WordsActivity.WORD_NUM, n);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
         notif.setLatestEventInfo(this, "words", "now " + n, pIntent);
+        notif.flags |= Notification.FLAG_AUTO_CANCEL;   // ставим флаг, чтобы уведомление пропало после нажатия
+        nm.notify(startId, notif);                      // отправляем уведомление
 
-        // ставим флаг, чтобы уведомление пропало после нажатия
-        notif.flags |= Notification.FLAG_AUTO_CANCEL;
 
-        // отправляем
-        nm.notify(startId, notif);
+        // Отослать текущий номер слова в WordActiity
+        intent = new Intent(WordsActivity.BROADCAST_ACTION);   // По значению BROADCAST_ACTION   BroadcastReceiver в WordActiity найдет сообщение. Это значение фильтра
+        intent.putExtra(WordsActivity.PARAM_CURRENT_NUM, n);
+        sendBroadcast(intent);
     }
 
 

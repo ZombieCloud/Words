@@ -1,12 +1,11 @@
 package com.app.words;
 
 import android.app.ActivityManager;
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -18,16 +17,21 @@ import android.widget.TextView;
 
 public class WordsActivity extends AppCompatActivity {
 
-    public final static String WORD_NUM = "word_num";
+    public final static String PARAM_START_NUM = "PARAM_START_NUM";
+    public final static String PARAM_LAST_NUM = "PARAM_LAST_NUM";;
+    public final static String PARAM_CURRENT_NUM = "PARAM_CURRENT_NUM";
+    public final static String BROADCAST_ACTION = "service_MainService";
+
     final String LOG_TAG = "wordLogs";
+
     TextView _textView;
     EditText _firstWord;
     EditText _lastWord;
     String startNum;
     String lastNum;
     Button button;
-    private MainService m_service;
-    boolean bound = false;
+
+    BroadcastReceiver br;    // это для обратной связи от сервиса MainService
 
 
     @Override
@@ -38,11 +42,6 @@ public class WordsActivity extends AppCompatActivity {
         //Устанавливаем заголовок кнопки в зависимости от того, запущен ли сервис
         button = (Button) findViewById(R.id.button);
         if (ServiceRunning(MainService.class)) {
-
-            //Присоединиться к сервису
-            Intent WordIntent = new Intent(this, MainService.class);
-            bindService(WordIntent, m_serviceConnection, BIND_AUTO_CREATE);
-
             button.setText("Stop");
         } else {
             button.setText("Go !!!");
@@ -51,6 +50,25 @@ public class WordsActivity extends AppCompatActivity {
         _textView = (TextView) findViewById(R.id.textView);
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
+
+
+
+
+        // создаем BroadcastReceiver
+        br = new BroadcastReceiver() {
+
+            // действия при получении сообщений
+            public void onReceive(Context context, Intent intent) {
+                String currentNum = intent.getStringExtra(PARAM_CURRENT_NUM);    // извлекаем значение параметра PARAM_CURRENT_NUM из intent, который пришел от MainService
+                 _textView.setText(currentNum);
+            }
+        };
+
+        // создаем фильтр для BroadcastReceiver
+        IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
+
+        // регистрируем (включаем) BroadcastReceiver
+        registerReceiver(br, intFilt);
 
     }
 
@@ -72,41 +90,31 @@ public class WordsActivity extends AppCompatActivity {
         }
 
 
+        Log.d(LOG_TAG, "startNum from Activity = " + startNum);
+        Log.d(LOG_TAG, "lastNum from Activity = " + lastNum);
+
+
         // Создаем сервис
         Intent WordIntent = new Intent(this, MainService.class);
-        WordIntent.putExtra("startNum", startNum);    // "putExtra"  вкладывает параметры в "intent". Их потом подберем в сервисе
-        WordIntent.putExtra("lastNum", lastNum);
 
 
-
-
-        //Запустить-присоединиться \ отсоединиться-остановить сервис
+        //Запустить \ остановить сервис
         if (ServiceRunning(MainService.class)) {
-            if (bound) {
-                unbindService(m_serviceConnection);
-                bound = false;
-            }
+
             stopService(WordIntent);
             button.setText("Go !!!");
+
         } else {
+
+            WordIntent.putExtra(PARAM_START_NUM, startNum);    // "putExtra"  вкладывает параметры в "intent". Их потом подберем в сервисе
+            WordIntent.putExtra(PARAM_LAST_NUM, lastNum);
+
             startService(WordIntent);
-            bindService(WordIntent, m_serviceConnection, BIND_AUTO_CREATE);
-            bound = true;
             button.setText("Stop");
         }
     }
 
 
-    // Писоединение к сервису
-    private ServiceConnection m_serviceConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            m_service = ((MainService.MyBinder)service).getService();
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            m_service = null;
-        }
-    };
 
 
 
@@ -119,6 +127,16 @@ public class WordsActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // дерегистрируем (выключаем) BroadcastReceiver
+        unregisterReceiver(br);
     }
 
 
