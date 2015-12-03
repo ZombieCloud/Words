@@ -18,6 +18,7 @@ public class Word {
 
     public String _en = "";
     public String _ru = "";
+    public String n = "";
     public File _enSound;
     public File _ruSound;
 
@@ -32,8 +33,9 @@ public class Word {
         InputStream in;
         int data;
         InputStreamReader isw;
-        _ru = "Something ru";
-        _en = "Something en";
+        _ru = "";
+        _en = "";
+        n = num;
 
 
 

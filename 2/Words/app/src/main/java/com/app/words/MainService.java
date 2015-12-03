@@ -70,7 +70,7 @@ public class MainService extends Service {
 
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
-        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  startId);
+        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)),  startId);
 
         return START_STICKY;
     }
@@ -111,11 +111,11 @@ public class MainService extends Service {
 
 
     // Достать/произнести слово.
-    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int startId) {
+    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum,  final int startId) {
         new Thread(new Runnable() {
             public void run() {
 
-                n = startNum;
+                n = currentNum;
                 while ((n >= startNum) && (n <= lastNum)) {
 
                     //Стоп потоку
@@ -190,9 +190,12 @@ public class MainService extends Service {
 
 
         //Начинаем играть
-        mediaPlayer_ru.start();
+        sendToActivity(_word._ru, _word.n);  //Текст на экран
+        mediaPlayer_ru.start();     //Проговорить
         Pause(pause_ru + pause_en);
-        mediaPlayer_en.start();
+
+        sendToActivity(_word._en, _word.n);  //Текст на экран
+        mediaPlayer_en.start();     //Проговорить
         Pause(pause_en + 3);
 
 
@@ -242,7 +245,7 @@ public class MainService extends Service {
 
 
 
-    // Уведомление и инфомация для Activity
+    // Уведомление для Activity
     void sendNotif(String n, int startId) {
 
         // Отослать уведомление в WordActiity
@@ -253,11 +256,21 @@ public class MainService extends Service {
         notif.flags |= Notification.FLAG_AUTO_CANCEL;   // ставим флаг, чтобы уведомление пропало после нажатия
         nm.notify(startId, notif);                      // отправляем уведомление
 
+        intent = null;
+    }
+
+
+
+    // Инфомация для Activity
+    void sendToActivity(String str, String num) {
 
         // Отослать текущий номер слова в WordActiity
-        intent = new Intent(WordsActivity.BROADCAST_ACTION);   // По значению BROADCAST_ACTION   BroadcastReceiver в WordActiity найдет сообщение. Это значение фильтра
-        intent.putExtra(WordsActivity.PARAM_CURRENT_NUM, n);
+        Intent intent = new Intent(WordsActivity.BROADCAST_ACTION);   // По значению BROADCAST_ACTION   BroadcastReceiver в WordActiity найдет сообщение. Это значение фильтра
+        intent.putExtra(WordsActivity.PARAM_CURRENT_WORD, str);
+        intent.putExtra(WordsActivity.PARAM_CURRENT_NUM, num);
         sendBroadcast(intent);
+
+        intent = null;
     }
 
 

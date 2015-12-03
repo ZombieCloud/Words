@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +20,7 @@ public class WordsActivity extends AppCompatActivity {
 
     public final static String PARAM_START_NUM = "PARAM_START_NUM";
     public final static String PARAM_LAST_NUM = "PARAM_LAST_NUM";;
+    public final static String PARAM_CURRENT_WORD = "PARAM_CURRENT_WORD";
     public final static String PARAM_CURRENT_NUM = "PARAM_CURRENT_NUM";
     public final static String BROADCAST_ACTION = "service_MainService";
 
@@ -27,8 +29,10 @@ public class WordsActivity extends AppCompatActivity {
     TextView _textView;
     EditText _firstWord;
     EditText _lastWord;
+    EditText _currentNum;
     String startNum;
     String lastNum;
+    String currentNum;
     Button button;
 
     BroadcastReceiver br;    // это для обратной связи от сервиса MainService
@@ -50,6 +54,7 @@ public class WordsActivity extends AppCompatActivity {
         _textView = (TextView) findViewById(R.id.textView);
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
+        _currentNum = (EditText) findViewById(R.id.currentNum);
 
 
 
@@ -60,7 +65,9 @@ public class WordsActivity extends AppCompatActivity {
             // действия при получении сообщений
             public void onReceive(Context context, Intent intent) {
                 String currentNum = intent.getStringExtra(PARAM_CURRENT_NUM);    // извлекаем значение параметра PARAM_CURRENT_NUM из intent, который пришел от MainService
-                 _textView.setText(currentNum);
+                String currentWord = intent.getStringExtra(PARAM_CURRENT_WORD);
+                _textView.setText(currentWord);
+                _currentNum.setText(currentNum);
             }
         };
 
@@ -82,11 +89,20 @@ public class WordsActivity extends AppCompatActivity {
             startNum = (Integer.valueOf(_firstWord.getText().toString())).toString();
             lastNum = (Integer.valueOf(_lastWord.getText().toString())).toString();
 
+            if (TextUtils.isEmpty(_currentNum.getText())) {
+                Log.d(LOG_TAG, "currentNum  is empty");
+                currentNum = startNum;
+            } else {
+                Log.d(LOG_TAG, "currentNum  is NOT empty");
+                currentNum = (Integer.valueOf(_currentNum.getText().toString())).toString();
+            }
+
         } catch (Exception e) {
 
             Log.d(LOG_TAG, "WRONG NUMBERS !!!");
             startNum = "100000";
             lastNum = "100000";
+            currentNum = "100000";
         }
 
 
@@ -108,6 +124,7 @@ public class WordsActivity extends AppCompatActivity {
 
             WordIntent.putExtra(PARAM_START_NUM, startNum);    // "putExtra"  вкладывает параметры в "intent". Их потом подберем в сервисе
             WordIntent.putExtra(PARAM_LAST_NUM, lastNum);
+            WordIntent.putExtra(PARAM_CURRENT_NUM, currentNum);
 
             startService(WordIntent);
             button.setText("Stop");
