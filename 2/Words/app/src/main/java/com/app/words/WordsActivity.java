@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -23,6 +24,8 @@ public class WordsActivity extends AppCompatActivity {
     public final static String PARAM_CURRENT_WORD = "PARAM_CURRENT_WORD";
     public final static String PARAM_CURRENT_NUM = "PARAM_CURRENT_NUM";
     public final static String BROADCAST_ACTION = "service_MainService";
+    public static final String PREFS_NAME = "WordsPrefsFile";
+
 
     final String LOG_TAG = "wordLogs";
 
@@ -56,6 +59,15 @@ public class WordsActivity extends AppCompatActivity {
         _lastWord = (EditText) findViewById(R.id.lastWord);
         _currentNum = (EditText) findViewById(R.id.currentNum);
 
+
+        // Восстановить состояние формы (восстанавливаем значения переменных)
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        startNum = settings.getString("startNum", "");
+        lastNum = settings.getString("lastNum", "");
+        currentNum = settings.getString("currentNum", "");
+        _firstWord.setText(startNum);
+        _lastWord.setText(lastNum);
+        _currentNum.setText(currentNum);
 
 
 
@@ -133,8 +145,6 @@ public class WordsActivity extends AppCompatActivity {
 
 
 
-
-
     //Проверяет, запущен ли сервис
     private boolean ServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -152,9 +162,16 @@ public class WordsActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
+        // Сохранить состояние формы (сохраняем значения переменных)
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("startNum", startNum);
+        editor.putString("lastNum", lastNum);
+        editor.putString("currentNum", currentNum);
+        editor.commit();
+
         // дерегистрируем (выключаем) BroadcastReceiver
         unregisterReceiver(br);
     }
-
 
 }
