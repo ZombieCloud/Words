@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -59,8 +60,14 @@ public class WordsActivity extends AppCompatActivity {
         _lastWord = (EditText) findViewById(R.id.lastWord);
         _currentNum = (EditText) findViewById(R.id.currentNum);
 
+        // Текущий номер должен быть недоступен для ручного ввода
+        _currentNum.setFocusable(false);
 
-        // Восстановить состояние формы (восстанавливаем значения переменных)
+        // Установить шрифт
+        _currentNum.setTypeface(Typeface.SERIF);  // Тут не так все просто...
+
+
+        // Восстановить сохраненное состояние формы (восстанавливаем значения переменных)
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         startNum = settings.getString("startNum", "");
         lastNum = settings.getString("lastNum", "");
@@ -71,7 +78,7 @@ public class WordsActivity extends AppCompatActivity {
 
 
 
-        // создаем BroadcastReceiver
+        // создаем BroadcastReceiver.  Будет подбирать сообщения от сервиса MainService
         br = new BroadcastReceiver() {
 
             // действия при получении сообщений
@@ -83,7 +90,7 @@ public class WordsActivity extends AppCompatActivity {
             }
         };
 
-        // создаем фильтр для BroadcastReceiver
+        // создаем фильтр для BroadcastReceiver. Он нужен для того, чтобы отлавливать сообщения от сервиса MainService
         IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
 
         // регистрируем (включаем) BroadcastReceiver
@@ -108,6 +115,13 @@ public class WordsActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "currentNum  is NOT empty");
                 currentNum = (Integer.valueOf(_currentNum.getText().toString())).toString();
             }
+            if (Integer.valueOf(currentNum) > Integer.valueOf(lastNum)) {
+                currentNum = startNum;
+            }
+            if (Integer.valueOf(currentNum) < Integer.valueOf(startNum)) {
+                currentNum = startNum;
+            }
+
 
         } catch (Exception e) {
 

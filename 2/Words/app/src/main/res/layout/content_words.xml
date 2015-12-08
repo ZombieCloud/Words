@@ -54,22 +54,24 @@
             <EditText
                 android:layout_width="96dp"
                 android:layout_height="wrap_content"
-                android:inputType="number"
                 android:ems="10"
                 android:id="@+id/currentNum"
                 android:layout_weight="1"
                 android:numeric="integer"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:editable="false"
+                android:inputType="none"
+                android:enabled="false" />
 
         </LinearLayout>
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="92dp"
             android:text="Go !!!"
             android:id="@+id/button"
             android:onClick="buttonOnClick"
-            android:layout_weight="0.19" />
+            android:layout_weight="0.15" />
 
     </LinearLayout>
 </RelativeLayout>
