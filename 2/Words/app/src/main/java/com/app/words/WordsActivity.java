@@ -63,8 +63,14 @@ public class WordsActivity extends AppCompatActivity {
         // Текущий номер должен быть недоступен для ручного ввода
         _currentNum.setFocusable(false);
 
-        // Установить шрифт
-        _currentNum.setTypeface(Typeface.SERIF);  // Тут не так все просто...
+
+        // Установить шрифт  (app/assets)
+//        Typeface face1 = Typeface.createFromAsset(getAssets(), "DEVRO1YSC.ttf");
+//        _textView.setTypeface(face1);
+        _textView.setTextSize(18);
+        Typeface face2 = Typeface.createFromAsset(getAssets(), "MotionPicture_PersonalUseOnly.ttf");
+        button.setTypeface(face2);
+        button.setTextSize(35);
 
 
         // Восстановить сохраненное состояние формы (восстанавливаем значения переменных)
