@@ -24,7 +24,8 @@
             android:id="@+id/textView"
             android:layout_gravity="center_horizontal"
             android:layout_weight="0.94"
-            android:minHeight="350dp" />
+            android:minHeight="350dp"
+            style="@style/style_for_TextView" />    <!-- values/styles/styles -->
 
         <LinearLayout
             android:orientation="horizontal"
@@ -39,7 +40,8 @@
                 android:id="@+id/firstWord"
                 android:layout_weight="1"
                 android:numeric="integer"
-                android:singleLine="true" />
+                android:singleLine="true"
+                style="@style/style_for_EditText" />    <!-- values/styles/styles -->
 
             <EditText
                 android:layout_width="98dp"
@@ -49,7 +51,8 @@
                 android:id="@+id/lastWord"
                 android:layout_weight="1"
                 android:numeric="integer"
-                android:singleLine="true" />
+                android:singleLine="true"
+                style="@style/style_for_EditText" />    <!-- values/styles/styles -->
 
             <EditText
                 android:layout_width="96dp"
@@ -61,7 +64,8 @@
                 android:singleLine="true"
                 android:editable="false"
                 android:inputType="none"
-                android:enabled="false" />
+                android:enabled="false"
+                style="@style/style_for_EditText" />    <!-- values/styles/styles -->
 
         </LinearLayout>
 
@@ -71,7 +75,9 @@
             android:text="Go !!!"
             android:id="@+id/button"
             android:onClick="buttonOnClick"
-            android:layout_weight="0.15" />
+            android:background="@drawable/button_style"
+            android:padding="10dp"
+            android:shadowColor="#702f2f" />   <!-- drawable/button_style.xml -->
 
     </LinearLayout>
 </RelativeLayout>
