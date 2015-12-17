@@ -65,12 +65,13 @@ public class MainService extends Service {
 
 
         // Запускаем сервис в режиме Foreground
-        Notification noti = new Notification();
-        startForeground(startId, noti);
-
+        startForeground(startId, new Notification());
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
-        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)),  startId);
+        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)));
+
+        // Отослать уведомление
+        sendNotif(startId);
 
         return START_STICKY;
     }
@@ -111,7 +112,7 @@ public class MainService extends Service {
 
 
     // Достать/произнести слово.
-    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum,  final int startId) {
+    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum) {
         new Thread(new Runnable() {
             public void run() {
 
@@ -122,9 +123,6 @@ public class MainService extends Service {
                     if (stop_thread) break;
 
                     Log.d(LOG_TAG, "n = " + n);
-
-                    // Отослать уведомление
-                    sendNotif(String.valueOf(n), startId);
 
                     //Достать новое слово
                     newWord = new Word(String.valueOf(n));
@@ -162,7 +160,7 @@ public class MainService extends Service {
             myUri = Uri.parse(_word._enSound.getAbsolutePath());             // "/mnt/sdcard/app_words/en_1.wav"
             mediaPlayer_en.setDataSource(getApplicationContext(), myUri);
             mediaPlayer_en.prepare();
-            pause_en = (int) ((mediaPlayer_en.getDuration() / 1000 + 1) * 2.5);
+            pause_en = (int) ((mediaPlayer_en.getDuration() / 1000 + 1) * 2.4);
 
             Log.d(LOG_TAG, "pause_en  =  " + pause_en);
 
@@ -246,13 +244,13 @@ public class MainService extends Service {
 
 
     // Уведомление для Activity
-    void sendNotif(String n, int startId) {
+    void sendNotif(int startId) {
 
         // Отослать уведомление в WordActiity
-        Notification notif = new Notification(R.drawable.notification_template_icon_bg, "now " + n, System.currentTimeMillis());
+        Notification notif = new Notification(R.mipmap.ic_launcher, "", System.currentTimeMillis());     // R.mipmap.ic_launcher - это иконка
         Intent intent = new Intent(this, WordsActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        notif.setLatestEventInfo(this, "words", "now " + n, pIntent);
+        notif.setLatestEventInfo(this, "Words", "hi !!!", pIntent);
         notif.flags |= Notification.FLAG_AUTO_CANCEL;   // ставим флаг, чтобы уведомление пропало после нажатия
         nm.notify(startId, notif);                      // отправляем уведомление
 
@@ -266,8 +264,8 @@ public class MainService extends Service {
 
         // Отослать текущий номер слова в WordActiity
         Intent intent = new Intent(WordsActivity.BROADCAST_ACTION);   // По значению BROADCAST_ACTION   BroadcastReceiver в WordActiity найдет сообщение. Это значение фильтра
-        intent.putExtra(WordsActivity.PARAM_CURRENT_WORD, str);
-        intent.putExtra(WordsActivity.PARAM_CURRENT_NUM, num);
+        intent.putExtra(WordsActivity.PARAM_CURRENT_WORD, str);       // Поместить str в intent
+        intent.putExtra(WordsActivity.PARAM_CURRENT_NUM, num);        // Поместить num в intent
         sendBroadcast(intent);
 
         intent = null;
