@@ -71,8 +71,6 @@ public class WordsActivity extends AppCompatActivity {
 
 
         // Установить шрифт  (app/assets)
-//        Typeface face1 = Typeface.createFromAsset(getAssets(), "DEVRO1YSC.ttf");
-//        _textView.setTypeface(face1);
         _textView.setTextSize(18);
         Typeface face2 = Typeface.createFromAsset(getAssets(), "MotionPicture_PersonalUseOnly.ttf");
         button.setTypeface(face2);

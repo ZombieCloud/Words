@@ -41,7 +41,7 @@ public class Word {
 
         // Слово EN (_en) ------------------
         try {
-            url = new URL("http://tests.progmans.net/index.php?NUM_EN=" + num);
+            url = new URL("http://words.progmans.net/index.php?NUM_EN=" + num);
             urlConnection = (HttpURLConnection) url.openConnection();
             in = urlConnection.getInputStream();
             isw = new InputStreamReader(in);
@@ -68,7 +68,7 @@ public class Word {
 
         // Слово RU (_ru) -----------------------
         try {
-            url = new URL("http://tests.progmans.net/index.php?NUM_RU=" + num);
+            url = new URL("http://words.progmans.net/index.php?NUM_RU=" + num);
             urlConnection = (HttpURLConnection) url.openConnection();
             in = urlConnection.getInputStream();
             isw = new InputStreamReader(in);
@@ -101,7 +101,7 @@ public class Word {
                 filename = "en_" + num + ".wav";
                 _enSound = new File(getSoundStorageDir("app_words"), filename);
                 if (!_enSound.exists()) {
-                    url = new URL("http://tests.progmans.net/index.php?NUM_EN_SOUND=" + num);
+                    url = new URL("http://words.progmans.net/index.php?NUM_EN_SOUND=" + num);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     in = urlConnection.getInputStream();
                     copyInputStreamToFile(in, _enSound);
@@ -126,7 +126,7 @@ public class Word {
                 filename = "ru_" + num + ".wav";
                 _ruSound = new File(getSoundStorageDir("app_words"), filename);
                 if (!_ruSound.exists()) {
-                    url = new URL("http://tests.progmans.net/index.php?NUM_RU_SOUND=" + num);
+                    url = new URL("http://words.progmans.net/index.php?NUM_RU_SOUND=" + num);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     in = urlConnection.getInputStream();
                     copyInputStreamToFile(in, _ruSound);
