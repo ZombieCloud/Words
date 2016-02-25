@@ -67,7 +67,7 @@ public class MainService extends Service {
         startForeground(startId, new Notification());
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
-        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)));
+        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)), intent.getBooleanExtra(WordsActivity.PARAM_RELOAD_WORDS, false));
 
         // Отослать уведомление
         sendNotif(startId);
@@ -111,7 +111,7 @@ public class MainService extends Service {
 
 
     // Достать/произнести слово.
-    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum) {
+    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum,  final boolean reloadWords) {
         new Thread(new Runnable() {
             public void run() {
 
@@ -124,7 +124,7 @@ public class MainService extends Service {
                     Log.d(LOG_TAG, "n = " + n);
 
                     //Достать новое слово
-                    newWord = new Word(String.valueOf(n));
+                    newWord = new Word(String.valueOf(n), reloadWords);
 
                     // Проиграть слово
                     PlayWords(newWord);

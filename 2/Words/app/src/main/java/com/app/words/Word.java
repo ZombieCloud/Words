@@ -19,13 +19,14 @@ public class Word {
     public String _en = "";
     public String _ru = "";
     public String n = "";
+    public boolean _reloadWords = false;
     public File _enSound;
     public File _ruSound;
 
 
 
     //Конструктор
-    public Word(String num) {
+    public Word(String num, boolean reloadWords) {
         String filename;
 
         URL url;
@@ -36,6 +37,7 @@ public class Word {
         _ru = "";
         _en = "";
         n = num;
+        _reloadWords = reloadWords;
 
 
 
@@ -100,6 +102,9 @@ public class Word {
             try {
                 filename = "en_" + num + ".wav";
                 _enSound = new File(getSoundStorageDir("app_words"), filename);
+                if (_reloadWords && _enSound.exists()) {
+                    _enSound.delete();
+                }
                 if (!_enSound.exists()) {
                     url = new URL("http://words.progmans.net/index.php?NUM_EN_SOUND=" + num);
                     urlConnection = (HttpURLConnection) url.openConnection();
@@ -125,6 +130,9 @@ public class Word {
             try {
                 filename = "ru_" + num + ".wav";
                 _ruSound = new File(getSoundStorageDir("app_words"), filename);
+                if (_reloadWords && _ruSound.exists()) {
+                    _ruSound.delete();
+                }
                 if (!_ruSound.exists()) {
                     url = new URL("http://words.progmans.net/index.php?NUM_RU_SOUND=" + num);
                     urlConnection = (HttpURLConnection) url.openConnection();

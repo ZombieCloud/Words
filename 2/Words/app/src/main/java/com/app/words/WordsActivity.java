@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ public class WordsActivity extends AppCompatActivity {
     public final static String PARAM_LAST_NUM = "PARAM_LAST_NUM";;
     public final static String PARAM_CURRENT_WORD = "PARAM_CURRENT_WORD";
     public final static String PARAM_CURRENT_NUM = "PARAM_CURRENT_NUM";
+    public final static String PARAM_RELOAD_WORDS = "PARAM_RELOAD_WORDS";
     public final static String BROADCAST_ACTION = "service_MainService";
     public static final String PREFS_NAME = "WordsPrefsFile";
 
@@ -35,9 +37,11 @@ public class WordsActivity extends AppCompatActivity {
     EditText _firstWord;
     EditText _lastWord;
     EditText _currentNum;
+    CheckBox _ReloadWords;
     String startNum;
     String lastNum;
     String currentNum;
+    Boolean reloadWords;
     Button button;
 
     BroadcastReceiver br;    // это для обратной связи от сервиса MainService
@@ -65,6 +69,7 @@ public class WordsActivity extends AppCompatActivity {
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
         _currentNum = (EditText) findViewById(R.id.currentNum);
+        _ReloadWords = (CheckBox) findViewById(R.id.cb_ReloadWords);
 
         // Текущий номер должен быть недоступен для ручного ввода
         _currentNum.setFocusable(false);
@@ -74,7 +79,7 @@ public class WordsActivity extends AppCompatActivity {
         _textView.setTextSize(18);
         Typeface face2 = Typeface.createFromAsset(getAssets(), "MotionPicture_PersonalUseOnly.ttf");
         button.setTypeface(face2);
-        button.setTextSize(35);
+        button.setTextSize(40);
 
 
         // Восстановить сохраненное состояние формы (восстанавливаем значения переменных)
@@ -116,6 +121,7 @@ public class WordsActivity extends AppCompatActivity {
         try {
             startNum = (Integer.valueOf(_firstWord.getText().toString())).toString();
             lastNum = (Integer.valueOf(_lastWord.getText().toString())).toString();
+            reloadWords = _ReloadWords.isChecked();
 
             if (TextUtils.isEmpty(_currentNum.getText())) {
                 Log.d(LOG_TAG, "currentNum  is empty");
@@ -160,6 +166,7 @@ public class WordsActivity extends AppCompatActivity {
             WordIntent.putExtra(PARAM_START_NUM, startNum);    // "putExtra"  вкладывает параметры в "intent". Их потом подберем в сервисе
             WordIntent.putExtra(PARAM_LAST_NUM, lastNum);
             WordIntent.putExtra(PARAM_CURRENT_NUM, currentNum);
+            WordIntent.putExtra(PARAM_RELOAD_WORDS, reloadWords);
 
             startService(WordIntent);
             button.setText("Stop");

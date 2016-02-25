@@ -78,4 +78,14 @@
         android:layout_alignEnd="@+id/linearLayout"
         style="@style/style_for_TextView" />
 
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="reload words"
+        android:id="@+id/cb_ReloadWords"
+        android:layout_above="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        style="@style/style_for_CheckBox"/>
+
 </RelativeLayout>
