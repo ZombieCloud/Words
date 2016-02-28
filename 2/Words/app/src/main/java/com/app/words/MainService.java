@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 import java.io.IOException;
+import java.util.EmptyStackException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -67,7 +68,13 @@ public class MainService extends Service {
         startForeground(startId, new Notification());
 
         // Перебор слов. Номера первого и последнего слов и интервал приезжают сюда вместе с intent
-        Start_Fetching_Of_The_Words(Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)), Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),  Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)), intent.getBooleanExtra(WordsActivity.PARAM_RELOAD_WORDS, false));
+        Start_Fetching_Of_The_Words(
+                Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_START_NUM)),
+                Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_LAST_NUM)),
+                Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_CURRENT_NUM)),
+                intent.getBooleanExtra(WordsActivity.PARAM_RELOAD_WORDS, false),
+                Integer.valueOf(intent.getStringExtra(WordsActivity.PARAM_NUM_REPEATS))
+        );
 
         // Отослать уведомление
         sendNotif(startId);
@@ -111,7 +118,7 @@ public class MainService extends Service {
 
 
     // Достать/произнести слово.
-    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum,  final boolean reloadWords) {
+    void Start_Fetching_Of_The_Words(final int startNum,  final int lastNum,  final int currentNum,  final boolean reloadWords,  final int numRepeats) {
         new Thread(new Runnable() {
             public void run() {
 
@@ -127,7 +134,11 @@ public class MainService extends Service {
                     newWord = new Word(String.valueOf(n), reloadWords);
 
                     // Проиграть слово
-                    PlayWords(newWord);
+                    try {
+                        PlayWords(newWord, numRepeats);
+                    } catch (EmptyStackException e) {
+                        e.printStackTrace();
+                    }
 
                     newWord = null;
 
@@ -145,7 +156,7 @@ public class MainService extends Service {
 
 
     //Произнести слово
-    private void PlayWords(Word _word) {
+    private void PlayWords(Word _word, int numRepeats) throws EmptyStackException {
 
         int pause_en = 1;
         int pause_ru = 1;
@@ -188,13 +199,16 @@ public class MainService extends Service {
 
         //Начинаем играть
         sendToActivity(_word._ru, _word.n);  //Текст на экран
-        mediaPlayer_ru.start();     //Проговорить
+        mediaPlayer_ru.start();     //Проговорить ru
         Pause(pause_ru + pause_en);
 
         sendToActivity(_word._en, _word.n);  //Текст на экран
-        mediaPlayer_en.start();     //Проговорить
-        Pause(pause_en + 3);
 
+        //Проговорить en
+        for (int i = 0; i < numRepeats; i++) {
+            mediaPlayer_en.start();
+            Pause(pause_en + 4);
+        }
 
         KillPlayer();
     }

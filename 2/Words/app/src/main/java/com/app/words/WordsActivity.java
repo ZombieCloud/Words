@@ -27,6 +27,7 @@ public class WordsActivity extends AppCompatActivity {
     public final static String PARAM_CURRENT_WORD = "PARAM_CURRENT_WORD";
     public final static String PARAM_CURRENT_NUM = "PARAM_CURRENT_NUM";
     public final static String PARAM_RELOAD_WORDS = "PARAM_RELOAD_WORDS";
+    public final static String PARAM_NUM_REPEATS = "PARAM_NUM_REPEATS";
     public final static String BROADCAST_ACTION = "service_MainService";
     public static final String PREFS_NAME = "WordsPrefsFile";
 
@@ -37,9 +38,11 @@ public class WordsActivity extends AppCompatActivity {
     EditText _firstWord;
     EditText _lastWord;
     EditText _currentNum;
+    EditText _numRepeats;
     CheckBox _ReloadWords;
     String startNum;
     String lastNum;
+    String numRepeats;
     String currentNum;
     Boolean reloadWords;
     Button button;
@@ -68,6 +71,7 @@ public class WordsActivity extends AppCompatActivity {
         _textView = (TextView) findViewById(R.id.textView);
         _firstWord = (EditText) findViewById(R.id.firstWord);
         _lastWord = (EditText) findViewById(R.id.lastWord);
+        _numRepeats = (EditText) findViewById(R.id.numRepeats);
         _currentNum = (EditText) findViewById(R.id.currentNum);
         _ReloadWords = (CheckBox) findViewById(R.id.cb_ReloadWords);
 
@@ -87,9 +91,11 @@ public class WordsActivity extends AppCompatActivity {
         startNum = settings.getString("startNum", "");
         lastNum = settings.getString("lastNum", "");
         currentNum = settings.getString("currentNum", "");
+        numRepeats = settings.getString("numRepeats", "");
         _firstWord.setText(startNum);
         _lastWord.setText(lastNum);
         _currentNum.setText(currentNum);
+        _numRepeats.setText(numRepeats);
 
 
 
@@ -119,8 +125,13 @@ public class WordsActivity extends AppCompatActivity {
 //        button = (Button) v;
 
         try {
+            if (TextUtils.isEmpty(_numRepeats.getText())) {
+                _numRepeats.setText("1");
+            }
+
             startNum = (Integer.valueOf(_firstWord.getText().toString())).toString();
             lastNum = (Integer.valueOf(_lastWord.getText().toString())).toString();
+            numRepeats = (Integer.valueOf(_numRepeats.getText().toString())).toString();
             reloadWords = _ReloadWords.isChecked();
 
             if (TextUtils.isEmpty(_currentNum.getText())) {
@@ -136,7 +147,6 @@ public class WordsActivity extends AppCompatActivity {
             if (Integer.valueOf(currentNum) < Integer.valueOf(startNum)) {
                 currentNum = startNum;
             }
-
 
         } catch (Exception e) {
 
@@ -167,6 +177,7 @@ public class WordsActivity extends AppCompatActivity {
             WordIntent.putExtra(PARAM_LAST_NUM, lastNum);
             WordIntent.putExtra(PARAM_CURRENT_NUM, currentNum);
             WordIntent.putExtra(PARAM_RELOAD_WORDS, reloadWords);
+            WordIntent.putExtra(PARAM_NUM_REPEATS, numRepeats);
 
             startService(WordIntent);
             button.setText("Stop");
@@ -198,6 +209,7 @@ public class WordsActivity extends AppCompatActivity {
         editor.putString("startNum", startNum);
         editor.putString("lastNum", lastNum);
         editor.putString("currentNum", currentNum);
+        editor.putString("numRepeats", numRepeats);
         editor.commit();
 
         // дерегистрируем (выключаем) BroadcastReceiver

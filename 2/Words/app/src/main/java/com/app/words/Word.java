@@ -157,6 +157,8 @@ public class Word {
             Log.d(LOG_TAG, "Storage is not available");
             _en = "Storage is not available :(";
             _ru = "Storage is not available :(";
+            _enSound = null;
+            _ruSound = null;
         }
     }
 
